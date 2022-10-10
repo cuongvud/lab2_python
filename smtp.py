@@ -1,12 +1,24 @@
 import smtplib 
 import os
 import sys
+import csv
 from configparser import ConfigParser
+import re
 
-def readFile(path):
-  file = open(path)
-  str = file.read()
-  return str
+def read_csv():
+    with open("./mail_data.csv", 'r') as file:
+        csv_reader = csv.reader(file)
+        count = 0
+        for row in csv_reader:
+            for item in row:
+              pattern = '(fuck)|(spam)'
+              count += len(re.findall(pattern, item))
+        check_is_spam = True if count > 5 else  False
+        print(count)  
+        print(check_is_spam)
+
+
+read_csv()
 
 def send_mail(subject, to_addr, body_text):
   """
@@ -35,8 +47,8 @@ def send_mail(subject, to_addr, body_text):
   server.sendmail(from_addr, [to_addr], BODY.encode('utf-8'))
   server.close()
 
-if __name__ == "__main__":
-  to_addr = 'familyninhbinh@gmail.com'
-  subject = "Test mail"
-  body_text = readFile("mail_data.csv")
-  send_mail(subject, to_addr, body_text)
+#if __name__ == "__main__":
+ # to_addr = 'familyninhbinh@gmail.com'
+  #subject = "Test mail"
+  #body_text = readFile("mail_data.csv")
+  #send_mail(subject, to_addr, body_text)
