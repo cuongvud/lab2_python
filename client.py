@@ -4,21 +4,7 @@ import sys
 import csv
 from configparser import ConfigParser
 import re
-
-def read_csv():
-    with open("./mail_data.csv", 'r') as file:
-        csv_reader = csv.reader(file)
-        count = 0
-        for row in csv_reader:
-            for item in row:
-              pattern = '(fuck)|(spam)'
-              count += len(re.findall(pattern, item))
-        check_is_spam = True if count > 5 else  False
-        print(count)  
-        print(check_is_spam)
-
-
-read_csv()
+import socket
 
 def send_mail(subject, to_addr, body_text):
   """
@@ -47,8 +33,15 @@ def send_mail(subject, to_addr, body_text):
   server.sendmail(from_addr, [to_addr], BODY.encode('utf-8'))
   server.close()
 
-#if __name__ == "__main__":
- # to_addr = 'familyninhbinh@gmail.com'
-  #subject = "Test mail"
-  #body_text = readFile("mail_data.csv")
-  #send_mail(subject, to_addr, body_text)
+readFile = open("mail_data.csv", "r")
+
+HOST = "localhost"  # The server's hostname or IP address
+PORT = 12500  # The port used by the server
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+  s.connect((HOST, PORT))
+  to_addr = 'familyninhbinh@gmail.com'
+  subject = "Test mail"
+  body_text = readFile.read()
+  s.send(send_mail(subject, to_addr, body_text))
+
