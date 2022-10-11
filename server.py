@@ -6,37 +6,37 @@ import re
 sender = 'server@proton.me'
 receivers = ['client@gmail.com']
 
-def receive_mail(data):
+def send_mail(sender, receivers, message) -> bool:
   try:
     smtpserver = smtplib.SMTP('localhost', 1025)
-    message = check_data()
-    if check_data.count > 5:
-      print("Not found Spam")
-      smtpserver.sendmail(sender, receivers, str(message))
+    smtpserver.sendmail(sender, receivers, str(message))
+    return True
   except smtplib.SMTPException:
-    return print("Can't send email")
-  
-def check_data():
-  with open("mail_data.csv", 'r') as file:
-    csv_reader = csv.reader(file)
-    count = 0
-    for row in csv_reader:
-      for item in row:
-        pattern = 'spam'
-        count += len(re.findall(pattern, item))
-    return count
+    return False
 
 host = "127.0.0.1"
 port = 12500
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host,port))
-server.listen()
-conn, addr = server.accept()
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind((host,port))
+sock.listen()
+print(f"Listening on {host}:{port}")
+conn, addr = sock.accept()
 with conn:
-  print(f"Connected by {addr}")
+  print(f"Connection received from {addr}")
   while True:
     data = conn.recv(1024)
     if data:
-      print(f"Data to send by mail: {data.decode()}")
-      # receive_mail(data.decode())
-    conn.sendall(data)
+      data = data.decode().splitlines()
+      source = data[0].split("From: ")[1]
+      print(f"From: {source}") # You can remove this line
+      destination = data[1].split("To: ")[1]
+      print(f"To: {destination}") # You can remove this line
+      subject = data[2].split("Subject: ")[1]
+      print(f"Subject: {subject}") # You can remove this line
+      message = "\n".join(data[4:])
+      print(f"Message: \n{message}") # You can remove this line
+      if send_mail(source, destination, message):
+        conn.send(b"Email sent.")
+      else:
+        conn.send(b"Cannot send email.")
+
