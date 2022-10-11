@@ -3,42 +3,40 @@ import socket
 import csv
 import re
 
-sender = 'familyninhbinh@gmail.com'
-receivers = ['nulldoot2k@proton.me']
+sender = 'server@proton.me'
+receivers = ['client@gmail.com']
 
-def sendemail(message):
+def receive_mail(data):
   try:
-    smtpObj = smtplib.SMTP('localhost', 1025)
-    message = read_csv()
-    smtpObj.sendmail(sender, receivers, str(message))
-    print("send")
-  except:
-    print("Can't send email")
-
-def read_csv():
-  with open("./mail_data.csv", 'r') as file:
+    smtpserver = smtplib.SMTP('localhost', 1025)
+    message = check_data()
+    if check_data.count > 5:
+      print("Not found Spam")
+      smtpserver.sendmail(sender, receivers, str(message))
+  except smtplib.SMTPException:
+    return print("Can't send email")
+  
+def check_data():
+  with open("mail_data.csv", 'r') as file:
     csv_reader = csv.reader(file)
     count = 0
     for row in csv_reader:
-        for item in row:
-          pattern = '(fuck)|(spam)'
-          count += len(re.findall(pattern, item))
-    check_is_spam = True if count > 5 else  False
-    print(count)  
-    print(check_is_spam)
+      for item in row:
+        pattern = 'spam'
+        count += len(re.findall(pattern, item))
+    return count
 
-host = 'localhost'
+host = "127.0.0.1"
 port = 12500
-size = 1024
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-  s.bind((host, port))
-  s.listen()
-  print(f"Listening on {host}:{port}")
-  client, addr = s.accept()
-  print(f"Received connection")
-  while 1:
-    data = client.recv(size)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((host,port))
+server.listen()
+conn, addr = server.accept()
+with conn:
+  print(f"Connected by {addr}")
+  while True:
+    data = conn.recv(1024)
     if data:
       print(f"Data to send by mail: {data.decode()}")
-      sendemail(data.decode())
-client.close()
+      # receive_mail(data.decode())
+    conn.sendall(data)
